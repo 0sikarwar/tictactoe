@@ -3,6 +3,9 @@ import Board from "./Board";
 import "../index.css";
 
 class Game extends React.Component {
+  /**
+   * Initial state of the game
+   */
   initialize = () => {
     return {
       history: [
@@ -44,10 +47,24 @@ class Game extends React.Component {
   };
 
   handleClick = i => {
+    /**
+     * If we jumped to some previous step, and then make
+     * a new move from that point, we throw away all "future"
+     * history that will now become irrelevant.
+     *
+     * slice(startingPoint, endPoint)
+     *
+     * startingPoint - Array index from where the "slicing" starts.
+     * endPoint - All array indices less than endPoint will be included in "slicing"
+     */
     const history = this.state.history.slice(0, this.state.stepNumber + 1);
     const current = history[history.length - 1];
     const squares = current.squares.slice();
     const columns = 3;
+
+    /**
+     * Calculate location of square when clicked
+     */
     const col = Math.floor(i % columns) + 1;
     const row = Math.floor(i / columns) + 1;
 
@@ -57,6 +74,10 @@ class Game extends React.Component {
 
     squares[i] = this.state.xIsNext ? "X" : "O";
 
+    /**
+     * concat() method does not mutate the Array
+     * unlike Array.push().
+     */
     this.setState(prevState => ({
       history: history.concat([
         {
@@ -147,6 +168,10 @@ class Game extends React.Component {
       );
     });
 
+    /**
+     * If this.state.toggle is "true", sort in
+     * "decending order" and vice versa.
+     */
     moves.sort((a, b) => {
       if (this.state.toggle) {
         return b.key - a.key;
@@ -164,21 +189,23 @@ class Game extends React.Component {
     }
     return (
       <div className="game">
-        {
+        {/** If there is a draw, hide the game board and show 
+          "Play again" button */
         gameStatus === "draw" ? (
           <div className="draw">
             <h2>Draw!</h2>
             <button onClick={() => this.reset()}>Play again</button>
           </div>
         ) : (
-          
+          /** Otherwise, show the game board */
           <div className="game-board">
             <Board
               squares={current.squares}
               winningSquares={gameStatus === "win" ? result.win.squares : []}
               onClick={(i, col, row) => this.handleClick(i, col, row)}
             />
-            {
+            {/** Depending upon the state of the game, either show 
+              "Play again" button or "Reset game" button */
             gameStatus === "win" ? (
               <div className="win">
                 <h2>{`"${result.win.player}" is winner!`}</h2>
@@ -194,7 +221,7 @@ class Game extends React.Component {
 
         <div className="game-info">
           <div>{status}</div>
-          {
+          {/** Show the toggle button only if there are two or more moves to sort */
           history.length > 1 ? (
             <button onClick={() => this.toggleMoves()}>Toggle moves</button>
           ) : (
